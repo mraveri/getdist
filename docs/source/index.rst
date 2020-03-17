@@ -10,6 +10,13 @@ GetDist is a Python package for analysing and plotting Monte Carlo (or other) sa
    Plot gallery and tutorial <https://getdist.readthedocs.org/en/latest/plot_gallery.html>
    GetDist GUI program <gui>
 
+Example usage notebooks:
+
+.. toctree::
+   :maxdepth: 1
+
+   Tension calculation <https://getdist.readthedocs.org/en/latest/tension_example.html>
+
 High-level modules for analysing samples and plotting:
 
 .. toctree::
@@ -30,6 +37,7 @@ Other main modules:
    :maxdepth: 1
 
    chains
+   chains_tension
    covmat
    densities
    gaussian_mixtures
@@ -38,5 +46,12 @@ Other main modules:
    parampriors
    types
 
-* :ref:`genindex`
+Interface modules:
 
+.. toctree::
+   :maxdepth: 1
+
+   cobaya_interface
+   cosmosis_interface
+
+* :ref:`genindex`

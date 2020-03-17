@@ -2087,17 +2087,21 @@ class MCSamples(Chains):
         """
         Returns a :class:`~.types.BestFit` object with best-fit point stored in .minimum or .bestfit file
 
-       :param max_posterior: whether to get maximum posterior (from .minimum file)
+        :param max_posterior: whether to get maximum posterior (from .minimum file)
                              or maximum likelihood (from .bestfit file)
-       :return:
+        :return:
         """
-        ext = '.minimum' if max_posterior else '.bestfit'
-        bf_file = self.root + ext
-        if os.path.exists(bf_file):
-            return types.BestFit(bf_file, max_posterior=max_posterior)
+        if hasattr(self, 'bestfit'):
+            return self.bestfit
         else:
-            raise MCSamplesError('Best fit can only be included if loaded from file and file_root%s exists '
-                                 '(cannot be calculated from samples)' % ext)
+            ext = '.minimum' if max_posterior else '.bestfit'
+            bf_file = self.root + ext
+            if os.path.exists(bf_file):
+                self.bestfit = types.BestFit(bf_file, max_posterior=max_posterior)
+                return self.bestfit
+            else:
+                raise MCSamplesError('Best fit can only be included if loaded from file and file_root%s exists '
+                                     '(cannot be calculated from samples)' % ext)
 
     def getMargeStats(self, include_bestfit=False):
         """

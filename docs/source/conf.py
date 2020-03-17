@@ -14,7 +14,6 @@
 
 import sys
 import os
-import getdist
 
 autoclass_content = 'both'
 
@@ -37,7 +36,9 @@ def setup(app):
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('exts'))
-sys.path.insert(0, os.path.abspath('../../getdist/'))
+here = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(here+'/../../'))
+import getdist
 
 # -- General configuration ------------------------------------------------
 
@@ -143,7 +144,7 @@ html_theme_options = {}
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
-html_extra_path = ['../plot_gallery.html']
+html_extra_path = ['../example_notebooks']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
