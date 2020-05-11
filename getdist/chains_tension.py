@@ -223,9 +223,11 @@ def Silverman_ROT(num_params, num_samples):
     :param num_samples: the number of samples in the chain.
     :return: Silverman's scaling.
     """
-    silverman_rot = ((4./(float(num_params)+2.))**(1./(float(num_params)+4.))
-                     / float(num_samples)**(1./(float(num_params)+4.)))**2
+    #silverman_rot = ((4./(float(num_params)+2.))**(1./(float(num_params)+4.))
+    #                 / float(num_samples)**(1./(float(num_params)+4.)))**2
+    silverman_rot = num_samples**(-1./(num_params+4.))
     return silverman_rot
+
 
 
 def gaussian_approximation(chain, param_names=None):
@@ -660,8 +662,14 @@ def exact_parameter_shift(diff_chain, param_names=None,
     if scale is None:
         # number of effective samples:
         neff = np.sum(diff_chain.weights)**2/np.sum(diff_chain.weights**2)
+        #scale = ((4./(float(_num_params)+2.))**(1./(float(_num_params)+4.))
+        #                 / float(neff)**(1./(float(_num_params)+4.)))**2
+        # Scott's Rule:
+        scale = neff**(-1./(_num_params+4.))
+        # Silverman:
+        #scale = (neff * (_num_params + 2) / 4.)**(-1. / (_num_params + 4))
         # get the scale:
-        scale = Silverman_ROT(_num_params, neff)
+        #scale = Silverman_ROT(_num_params, neff)
         if feedback > 0:
             print('Neff samples:', neff)
     if feedback > 0:
@@ -682,7 +690,7 @@ def exact_parameter_shift(diff_chain, param_names=None,
                 _kde_eval_pdf = parallel(joblib.delayed(_temp_kde_pdf)
                                          (samp, _white_samples,
                                           diff_chain.weights)
-                                         for samp in tqdm(_white_samples))
+                                         for samp in tqdm(_white_samples,ascii=True))
             else:
                 _kde_eval_pdf = parallel(joblib.delayed(_temp_kde_pdf)
                                          (samp, _white_samples,
@@ -758,7 +766,7 @@ def exact_parameter_shift(diff_chain, param_names=None,
                 if feedback > 1:
                     _kde_eval_pdf[_filter] = parallel(joblib.delayed(_temp_kde_pdf)
                         (samp, _white_samples, diff_chain.weights)
-                        for samp in tqdm(_white_samples[_filter]))
+                        for samp in tqdm(_white_samples[_filter],ascii=True))
                 else:
                     _kde_eval_pdf[_filter] = parallel(joblib.delayed(_temp_kde_pdf)
                         (samp, _white_samples, diff_chain.weights)
@@ -1040,7 +1048,7 @@ def Q_UDM_get_cutoff(chain_1, chain_2, chain_12,
     return KL_cutoff, KL_eig, KL_eigv, param_names
 
 
-def Q_UDM(chain_1, chain_12, cutoff=1.05, param_names=None):
+def Q_UDM(chain_1, chain_12, cutoff=1.05, upper_cutoff=100., param_names=None):
     """
     Compute the value and degrees of freedom of the quadratic form giving the
     probability of a difference between the means of the two input chains,
@@ -1080,6 +1088,7 @@ def Q_UDM(chain_1, chain_12, cutoff=1.05, param_names=None):
         with physical dimensions of parameters and cutoff sets the minimum
         improvement with respect to the prior that is used.
         Default is five percent.
+    :param upper_cutoff: upper cutoff for the selection of KL modes.
     :param param_names: (optional) parameter names of the parameters to be used
         in the calculation. By default all running parameters.
     :return: :math:`Q_{\\rm UDM}` value and number of degrees of freedom.
@@ -1097,7 +1106,9 @@ def Q_UDM(chain_1, chain_12, cutoff=1.05, param_names=None):
                                  for name in param_names])
     shift = theta_1 - theta_12
     # do the Q_UDM calculation:
-    _filter = np.logical_and(KL_eig > cutoff, KL_eig > 1.)
+    #_filter = np.logical_and(KL_eig > cutoff, KL_eig > 1.)
+    #_filter = np.logical_and(KL_eig < upper_cutoff, _filter)
+    _filter = np.logical_and(KL_eig > cutoff, KL_eig < upper_cutoff)
     Q_UDM = np.sum(np.dot(KL_eigv.T, shift)[_filter]**2./(KL_eig[_filter]-1.))
     dofs = np.sum(_filter)
     #
